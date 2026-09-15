@@ -148,3 +148,63 @@ def get_students(request):
     students = Student.objects.all()
     serializer = StudentSerializer(students, many=True)
     return JsonResponse({"students": serializer.data, "count": len(serializer.data)}, status = 200)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_student(request, pk):
+    """GET: retrieve a student"""
+    try:
+        student = Student.objects.get(id=pk)
+        serializer = StudentSerializer(student)
+        return JsonResponse ({"student": serializer.data},status=200)
+    except Student.DoesNotExist:
+        return JsonResponse({"error": "student not found"}, status=404)
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def create_student(request):
+    """POST: create a new student"""
+    json_data = json.loads(request.body)
+    serializer = StudentSerializer(data=json_data)
+    if serializer.is_valid():
+        student = serializer.save()
+        student_data = StudentSerializer(student).data
+
+        return JsonResponse({
+            "message": "student created successfully",
+            "student": student_data
+        },status= 201)
+    return JsonResponse({"error": serializer.errors},status=400)
+
+@csrf_exempt
+@require_http_methods(['PUT', 'PATCH'])
+def update_student(request, student_id):
+    """PUT/PATCH: update  a student"""
+    data = json.loads(request.body)
+    try:
+        student = Student.objects.get(id=student_id)
+    except Student.DoesNotExist:
+        return JsonResponse({"error": "student not found"}, status=404)
+
+    update_serializer = StudentSerializer(student, data=data)
+
+    if update_serializer.is_valid():
+        student = update_serializer.save()
+        student_data = StudentSerializer(student).data
+        return JsonResponse({
+            "message": "student updated successfully",
+            "student": student_data
+        },status=200)
+    return JsonResponse({"error": update_serializer.errors},status=400) 
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_student(request, pk):
+    """DELETE: delete a student"""
+    try:
+        student = Student.objects.get(id=pk)
+        student.delete()
+        return JsonResponse({"message": "student deleted successfully"}, status=200)
+    except Student.DoesNotExist:
+        return JsonResponse({"error": "student not found"}, status=404)
+    

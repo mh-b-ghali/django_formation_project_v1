@@ -8,7 +8,7 @@ class StudentSerializer(serializers.ModelSerializer):
         # fields = "__all__" # get all fields
         read_only_fields = ['id']
 
-    def validator_email(self, value):
+    def validate_email(self, value):
         """
         Custom validation for email field.
         this runs during both create and update operations
@@ -26,7 +26,7 @@ class StudentSerializer(serializers.ModelSerializer):
             
         return value
 
-    def validator_age(self, value):
+    def validate_age(self, value):
         """
         Custom validation for age field.
         """
